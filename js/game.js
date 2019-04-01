@@ -29,6 +29,7 @@ $(document).ready(function () {
     ];
 
     var obstacles = [];
+    var score = 0;
 
     var gameWidth = window.innerWidth;
     var gameHeight = window.innerHeight;
@@ -41,6 +42,7 @@ $(document).ready(function () {
         });
     $('body').append(canvas);
     var ctx = canvas[0].getContext('2d');
+    ctx.font = "30px Arial";
 
     var skierDirection = 5;
     var skierMapX = 0;
@@ -191,6 +193,11 @@ $(document).ready(function () {
     };
 
     var placeNewObstacle = function (direction) {
+        var scoreableDirection = [2, 3, 4];
+        if (scoreableDirection.includes(direction)) {
+            score += 1;
+        }
+
         var shouldPlaceObstacle = _.random(1, 8);
         if (shouldPlaceObstacle !== 8) {
             return;
@@ -257,7 +264,7 @@ $(document).ready(function () {
 
     var checkIfSkierHitObstacle = function () {
         var skierAssetName = getSkierAsset();
-        if (skierAssetName !== 'isJumping') {
+        if (skierAssetName !== 'isJumping' && !isJumping) {
             var skierImage = loadedAssets[skierAssetName];
             var skierRect = {
                 left: skierMapX + gameWidth / 2,
@@ -315,6 +322,7 @@ $(document).ready(function () {
 
         drawObstacles();
 
+        ctx.fillText("Score: " + score, 10, 50);
         ctx.restore();
 
         requestAnimationFrame(gameLoop);
@@ -343,8 +351,8 @@ $(document).ready(function () {
     };
 
     var setupKeyhandler = function () {
-        if (!isJumping) {
-            $(window).keydown(function (event) {
+        $(window).keydown(function (event) {
+            if (!isJumping) {
                 switch (event.which) {
                     case 37: // left
                         if (skierDirection === 1) {
@@ -376,8 +384,8 @@ $(document).ready(function () {
                         event.preventDefault();
                         break;
                 }
-            });
-        }
+            }
+        });
     };
 
     var initGame = function () {
