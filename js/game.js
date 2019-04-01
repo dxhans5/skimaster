@@ -62,6 +62,7 @@ $(document).ready(function () {
                 placeNewObstacle(skierDirection);
                 break;
             case 3:
+            case 10:
                 skierMapY += skierSpeed;
                 if (isJumping) {
                     jumpAnimationCycle();
@@ -78,38 +79,32 @@ $(document).ready(function () {
     };
 
     var jumpAnimationCycle = function () {
-        jumpAsset = null;
         jumpIteration++;
 
-        console.log(jumpIteration);
-        switch (jumpIteration) {
-            case (jumpIteration <= 3):
-                console.log('trigger1');
-                jumpAsset = loadedAssets.jump1;
-                console.log(jumpAsset);
-                debugger;
+        switch (true) {
+            case (jumpIteration <= 15):
+                return loadedAssets.jump1;
                 break;
-            case (jumpIteration > 3 && jumpIteration <= 6):
-                jumpAsset = loadedAssets.jump2;
+            case (jumpIteration > 15 && jumpIteration <= 30):
+                return loadedAssets.jump2;
                 break;
-            case (jumpIteration > 6 && jumpIteration <= 9):
-                jumpAsset = loadedAssets.jump3;
+            case (jumpIteration > 30 && jumpIteration <= 45):
+                return loadedAssets.jump3;
                 break;
-            case (jumpIteration > 9 && jumpIteration <= 12):
-                jumpAsset = loadedAssets.jump4;
+            case (jumpIteration > 45 && jumpIteration <= 60):
+                return loadedAssets.jump4;
                 break;
-            case (jumpIteration > 12 && jumpIteration <= 15):
-                jumpAsset = loadedAssets.jump5;
+            case (jumpIteration > 60 && jumpIteration <= 75):
+                return loadedAssets.jump5;
                 break;
         }
 
-        if (jumpIteration == 16) {
-            jumpAsset = jumpAsset = loadedAssets.skierDown;
+        if (jumpIteration == 76) {
             jumpIteration = 0;
             isJumping = false;
+            skierDirection = 3;
+            return loadedAssets.skierDown;
         }
-
-        return jumpAsset;
     };
 
     var getSkierAsset = function () {
@@ -146,12 +141,11 @@ $(document).ready(function () {
         var skierImage = null;
 
         if (skierAssetName == 'isJumping') {
-            skierImage = loadedAssets[jumpAnimationCycle()];
+            skierImage = jumpAnimationCycle();
         } else {
             skierImage = loadedAssets[skierAssetName];
         }
 
-        console.log(skierImage);
         var x = (gameWidth - skierImage.width) / 2;
         var y = (gameHeight - skierImage.height) / 2;
 
