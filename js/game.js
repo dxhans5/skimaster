@@ -52,6 +52,7 @@ $(document).ready(function () {
     $('body').append(canvas);
     var ctx = canvas[0].getContext('2d');
     ctx.font = "30px Arial";
+    ctx.textAlign = "center";
 
     var skierSpeed = 8;
     var rhinoSpeed = 4;
@@ -141,15 +142,6 @@ $(document).ready(function () {
 
     var endGame = function () {
         gameOver = true;
-
-        ctx.font = "50px Arial";
-        ctx.textAlign = "center";
-        ctx.fillText("Game Over", (gameWidth / 2), (gameHeight / 2));
-
-        ctx.font = "30px Arial";
-        ctx.fillText("Final Score: " + score, (gameWidth / 2), (gameHeight / 2) + 50);
-        ctx.fillText("Play Again? [y]", (gameWidth / 2), (gameHeight / 2) + 100);
-
     }
 
     var jumpAnimationCycle = function () {
@@ -262,7 +254,7 @@ $(document).ready(function () {
 
     var drawSkier = function () {
         var skierAssetName = getSkierAsset();
-        if(skierAssetName == 'skierCrash') {
+        if (skierAssetName == 'skierCrash') {
             endGame();
         }
         var skierImage = null;
@@ -434,14 +426,13 @@ $(document).ready(function () {
     };
 
     var gameLoop = function () {
+        ctx.save();
+        // Retina support
+        ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+
+        clearCanvas();
+
         if (!gameOver) {
-            ctx.save();
-
-            // Retina support
-            ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
-
-            clearCanvas();
-
             if (!skierEaten) {
                 moveSkier();
                 checkIfSkierHitObstacle();
@@ -454,8 +445,15 @@ $(document).ready(function () {
 
             drawObstacles();
 
-            ctx.fillText("Score: " + score, 10, 50);
+            ctx.fillText("Score: " + score, (gameWidth / 2), 50);
             ctx.restore();
+        } else {
+            ctx.font = "50px Arial";
+            ctx.fillText("Game Over", (gameWidth / 2), (gameHeight / 2));
+
+            ctx.font = "30px Arial";
+            ctx.fillText("Final Score: " + score, (gameWidth / 2), (gameHeight / 2) + 50);
+            ctx.fillText("Play Again? [y]", (gameWidth / 2), (gameHeight / 2) + 100);
         }
 
         requestAnimationFrame(gameLoop);
@@ -519,7 +517,7 @@ $(document).ready(function () {
                 }
             }
 
-            if (gameOver && event.which == 89) {
+            if (gameOver && event.which == 89) { // Y key
                 resetGame();
                 initGame(gameLoop);
             }
