@@ -59,6 +59,7 @@ $(document).ready(function () {
     // TODO Remove the defaults;
     var score = 0;
     var gameOver = false;
+    var gamePaused = false;
     var skierDirection = 5;
     var rhinoAction = 0;
     var skierMapX = 0;
@@ -456,7 +457,12 @@ $(document).ready(function () {
             ctx.fillText("Play Again? [y]", (gameWidth / 2), (gameHeight / 2) + 100);
         }
 
-        requestAnimationFrame(gameLoop);
+        if (gamePaused) {
+            ctx.font = "50px Arial";
+            ctx.fillText("Game Paused", (gameWidth / 2), (gameHeight / 2));
+        } else {
+            requestAnimationFrame(gameLoop);
+        }
     };
 
     var loadAssets = function () {
@@ -481,10 +487,23 @@ $(document).ready(function () {
         return $.when.apply($, assetPromises);
     };
 
+    var pauseGame = function () {
+        if (gamePaused) {
+            gamePaused = false;
+            requestAnimationFrame(gameLoop);
+        } else {
+            gamePaused = true;
+        }
+    }
+
     var setupKeyhandler = function () {
         $(window).keydown(function (event) {
             if (!isJumping) {
                 switch (event.which) {
+                    case 27: // escape (pause)
+                        pauseGame();
+                        event.preventDefault();
+                        break;
                     case 37: // left
                         if (skierDirection === 1) {
                             skierMapX -= skierSpeed;

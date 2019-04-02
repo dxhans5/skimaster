@@ -60,5 +60,8 @@ We are looking forward to see what you come up with!
 - Included ramps into the slope
 - Animated skier when hitting the ramps
 - Implemented a scoreboard
+- Rhino will now eat the skier after 5000 points
+- Created a restart module that allows players to play again
+- 
 
 
