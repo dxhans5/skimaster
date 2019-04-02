@@ -62,6 +62,10 @@ We are looking forward to see what you come up with!
 - Implemented a scoreboard
 - Rhino will now eat the skier after 5000 points
 - Created a restart module that allows players to play again
-- 
+- Added ability to pause/unpause game (pressing ESC)
+- Skier speed increases every 300 points
+- Deployed app to Heroku ()
+
+- KNOWN BUG: The skier speed increases a lot after restarting the game (after a crash or being eaten)
 
 

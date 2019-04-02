@@ -71,6 +71,8 @@ $(document).ready(function () {
     var skierEaten = false;
 
     var resetGame = function () {
+        gameWidth = window.innerWidth;
+        gameHeight = window.innerHeight;
         score = 0;
         gameOver = false;
         skierDirection = 5;
@@ -89,6 +91,10 @@ $(document).ready(function () {
     };
 
     var moveSkier = function () {
+        if (score % 300 === 0 && score !== 0) {
+            skierSpeed += 1; // speed up
+        }
+
         switch (skierDirection) {
             case 2:
                 skierMapX -= Math.round(skierSpeed / 1.4142);
@@ -440,7 +446,7 @@ $(document).ready(function () {
                 drawSkier();
             }
 
-            if (score > 500) {
+            if (score > 5000) {
                 drawRhino();
             }
 
