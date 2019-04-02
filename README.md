@@ -59,5 +59,6 @@ We are looking forward to see what you come up with!
 - Fixed the collision to left standing bug
 - Included ramps into the slope
 - Animated skier when hitting the ramps
+- Implemented a scoreboard
 
 

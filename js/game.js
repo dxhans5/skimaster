@@ -9,6 +9,14 @@ $(document).ready(function () {
         'skierRight': 'img/skier_right.png',
         'tree': 'img/tree_1.png',
         'treeCluster': 'img/tree_cluster.png',
+        'rhinoRun1': 'img/rhino_run_left.png',
+        'rhinoRun2': 'img/rhino_run_left_2.png',
+        'rhinoLift1': 'img/rhino_lift.png',
+        'rhinoLift2': 'img/rhino_lift_mouth_open.png',
+        'rhinoEat1': 'img/rhino_lift_eat_1.png',
+        'rhinoEat2': 'img/rhino_lift_eat_2.png',
+        'rhinoEat3': 'img/rhino_lift_eat_3.png',
+        'rhinoEat4': 'img/rhino_lift_eat_4.png',
         'rock1': 'img/rock_1.png',
         'rock2': 'img/rock_2.png',
         'jump1': 'img/skier_jump_1.png',
@@ -25,7 +33,9 @@ $(document).ready(function () {
         'treeCluster',
         'rock1',
         'rock2',
-        'ramp'
+        'ramp',
+        'rhinoRun1',
+        'rhinoRun2'
     ];
 
     var obstacles = [];
@@ -45,11 +55,16 @@ $(document).ready(function () {
     ctx.font = "30px Arial";
 
     var skierDirection = 5;
+    var rhinoAction = 0;
     var skierMapX = 0;
     var skierMapY = 0;
+    var rhinoMapX = 0;
     var skierSpeed = 8;
+    var rhinoSpeed = 4;
     var isJumping = false;
     var jumpIteration = 0;
+    var eatIteration = 0;
+    var skierEaten = false;
 
     var clearCanvas = function () {
         ctx.clearRect(0, 0, gameWidth, gameHeight);
@@ -77,6 +92,39 @@ $(document).ready(function () {
 
                 placeNewObstacle(skierDirection);
                 break;
+        }
+    };
+
+    var rhinoEatAnimationCycle = function () {
+        eatIteration++;
+
+        switch (true) {
+            case (eatIteration <= 15):
+                return loadedAssets.rhinoLift1;
+                break;
+            case (eatIteration > 15 && eatIteration <= 30):
+                return loadedAssets.rhinoLift2;
+                break;
+            case (eatIteration > 30 && eatIteration <= 45):
+                return loadedAssets.rhinoEat1;
+                break;
+            case (eatIteration > 45 && eatIteration <= 60):
+                return loadedAssets.rhinoEat2;
+                break;
+            case (eatIteration > 60 && eatIteration <= 75):
+                return loadedAssets.rhinoEat3;
+                break;
+            case (eatIteration > 75 && eatIteration <= 90):
+                return loadedAssets.rhinoEat4;
+                break;
+            case (eatIteration > 90 && eatIteration <= 105):
+                return loadedAssets.rhinoEat5;
+                break;
+        }
+
+        // Game Over
+        if (eatIteration == 106) {
+            debugger;
         }
     };
 
@@ -109,6 +157,37 @@ $(document).ready(function () {
         }
     };
 
+    var getRhinoAsset = function () {
+        switch (rhinoAction) {
+            case 0:
+                rhinoAssetName = 'rhinoRun1';
+                break;
+            case 1:
+                rhinoAssetName = 'rhinoRun2';
+                break;
+            case 2:
+                rhinoAssetName = 'rhinoLift1';
+                break;
+            case 3:
+                rhinoAssetName = 'rhinoLift2';
+                break;
+            case 4:
+                rhinoAssetName = 'rhinoLift3';
+                break;
+            case 5:
+                rhinoAssetName = 'rhinoLift4';
+                break;
+            case 6:
+                rhinoAssetName = 'rhinoLift5';
+                break;
+            case 6:
+                rhinoAssetName = 'rhinoLift6';
+                break;
+
+        }
+        return rhinoAssetName;
+    }
+
     var getSkierAsset = function () {
         var skierAssetName;
         switch (skierDirection) {
@@ -137,6 +216,23 @@ $(document).ready(function () {
         }
         return skierAssetName;
     };
+
+    var drawRhino = function () {
+        var rhinoAssetName = getRhinoAsset();
+        rhinoImage = loadedAssets[rhinoAssetName];
+
+        var x = (gameWidth - rhinoImage.width) - rhinoMapX;
+        var y = (gameHeight - rhinoImage.height) / 2;
+
+        if (rhinoMapX >= ((gameWidth / 2) - rhinoImage.width)) {
+            skierEaten = true;
+            rhinoImage = rhinoEatAnimationCycle();
+        } else {  
+            rhinoMapX += rhinoSpeed;  
+        }
+
+        ctx.drawImage(rhinoImage, x, y, rhinoImage.width, rhinoImage.height);
+    }
 
     var drawSkier = function () {
         var skierAssetName = getSkierAsset();
@@ -234,14 +330,17 @@ $(document).ready(function () {
 
     var placeRandomObstacle = function (minX, maxX, minY, maxY) {
         var obstacleIndex = _.random(0, obstacleTypes.length - 1);
+        var obstacleType = obstacleTypes[obstacleIndex];
 
-        var position = calculateOpenPosition(minX, maxX, minY, maxY);
+        if (obstacleType !== 'rhinoRun1' && obstacleType !== 'rhinoRun2') {
+            var position = calculateOpenPosition(minX, maxX, minY, maxY);
 
-        obstacles.push({
-            type: obstacleTypes[obstacleIndex],
-            x: position.x,
-            y: position.y
-        })
+            obstacles.push({
+                type: obstacleType,
+                x: position.x,
+                y: position.y
+            })
+        }
     };
 
     var calculateOpenPosition = function (minX, maxX, minY, maxY) {
@@ -314,11 +413,15 @@ $(document).ready(function () {
 
         clearCanvas();
 
-        moveSkier();
+        if (!skierEaten) {
+            moveSkier();
+            checkIfSkierHitObstacle();
+            drawSkier();
+        }
 
-        checkIfSkierHitObstacle();
-
-        drawSkier();
+        if (score > 500) {
+            drawRhino();
+        }
 
         drawObstacles();
 
