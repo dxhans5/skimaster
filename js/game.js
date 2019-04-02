@@ -39,7 +39,6 @@ $(document).ready(function () {
     ];
 
     var obstacles = [];
-    var score = 0;
 
     var gameWidth = window.innerWidth;
     var gameHeight = window.innerHeight;
@@ -54,17 +53,34 @@ $(document).ready(function () {
     var ctx = canvas[0].getContext('2d');
     ctx.font = "30px Arial";
 
+    var skierSpeed = 8;
+    var rhinoSpeed = 4;
+    // TODO Remove the defaults;
+    var score = 0;
+    var gameOver = false;
     var skierDirection = 5;
     var rhinoAction = 0;
     var skierMapX = 0;
     var skierMapY = 0;
     var rhinoMapX = 0;
-    var skierSpeed = 8;
-    var rhinoSpeed = 4;
     var isJumping = false;
     var jumpIteration = 0;
     var eatIteration = 0;
     var skierEaten = false;
+
+    var resetGame = function () {
+        score = 0;
+        gameOver = false;
+        skierDirection = 5;
+        rhinoAction = 0;
+        skierMapX = 0;
+        skierMapY = 0;
+        rhinoMapX = 0;
+        isJumping = false;
+        jumpIteration = 0;
+        eatIteration = 0;
+        skierEaten = false;
+    }
 
     var clearCanvas = function () {
         ctx.clearRect(0, 0, gameWidth, gameHeight);
@@ -118,15 +134,23 @@ $(document).ready(function () {
                 return loadedAssets.rhinoEat4;
                 break;
             case (eatIteration > 90 && eatIteration <= 105):
-                return loadedAssets.rhinoEat5;
+                endGame();
                 break;
         }
-
-        // Game Over
-        if (eatIteration == 106) {
-            debugger;
-        }
     };
+
+    var endGame = function () {
+        gameOver = true;
+
+        ctx.font = "50px Arial";
+        ctx.textAlign = "center";
+        ctx.fillText("Game Over", (gameWidth / 2), (gameHeight / 2));
+
+        ctx.font = "30px Arial";
+        ctx.fillText("Final Score: " + score, (gameWidth / 2), (gameHeight / 2) + 50);
+        ctx.fillText("Play Again? [y]", (gameWidth / 2), (gameHeight / 2) + 100);
+
+    }
 
     var jumpAnimationCycle = function () {
         jumpIteration++;
@@ -227,15 +251,20 @@ $(document).ready(function () {
         if (rhinoMapX >= ((gameWidth / 2) - rhinoImage.width)) {
             skierEaten = true;
             rhinoImage = rhinoEatAnimationCycle();
-        } else {  
-            rhinoMapX += rhinoSpeed;  
+        } else {
+            rhinoMapX += rhinoSpeed;
         }
 
-        ctx.drawImage(rhinoImage, x, y, rhinoImage.width, rhinoImage.height);
+        if (!gameOver) {
+            ctx.drawImage(rhinoImage, x, y, rhinoImage.width, rhinoImage.height);
+        }
     }
 
     var drawSkier = function () {
         var skierAssetName = getSkierAsset();
+        if(skierAssetName == 'skierCrash') {
+            endGame();
+        }
         var skierImage = null;
 
         if (skierAssetName == 'isJumping') {
@@ -405,28 +434,29 @@ $(document).ready(function () {
     };
 
     var gameLoop = function () {
+        if (!gameOver) {
+            ctx.save();
 
-        ctx.save();
+            // Retina support
+            ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
 
-        // Retina support
-        ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+            clearCanvas();
 
-        clearCanvas();
+            if (!skierEaten) {
+                moveSkier();
+                checkIfSkierHitObstacle();
+                drawSkier();
+            }
 
-        if (!skierEaten) {
-            moveSkier();
-            checkIfSkierHitObstacle();
-            drawSkier();
+            if (score > 500) {
+                drawRhino();
+            }
+
+            drawObstacles();
+
+            ctx.fillText("Score: " + score, 10, 50);
+            ctx.restore();
         }
-
-        if (score > 500) {
-            drawRhino();
-        }
-
-        drawObstacles();
-
-        ctx.fillText("Score: " + score, 10, 50);
-        ctx.restore();
 
         requestAnimationFrame(gameLoop);
     };
@@ -488,12 +518,18 @@ $(document).ready(function () {
                         break;
                 }
             }
+
+            if (gameOver && event.which == 89) {
+                resetGame();
+                initGame(gameLoop);
+            }
         });
     };
 
     var initGame = function () {
         setupKeyhandler();
         loadAssets().then(function () {
+            resetGame();
             placeInitialObstacles();
 
             requestAnimationFrame(gameLoop);
